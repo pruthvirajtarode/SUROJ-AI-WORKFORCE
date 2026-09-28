@@ -25,17 +25,89 @@ const ResourceCentre = () => {
       // Trigger actual file download
       if (res.type === 'PDF') {
         const doc = new jsPDF();
+        
         doc.setFontSize(22);
-        doc.text(`Suroj Buildcon x Be10x AI Transformation`, 20, 30);
+        doc.setTextColor(20, 22, 26); // dark ink
+        doc.text(`Suroj Buildcon x Be10x AI Transformation`, 20, 25);
+        
         doc.setFontSize(16);
-        doc.text(res.title, 20, 50);
-        doc.setFontSize(12);
-        doc.text(`This is an officially generated document for the workshop.`, 20, 70);
-        doc.text(`Confidential - For Internal Use Only`, 20, 90);
+        doc.setTextColor(176, 67, 30); // rust color
+        doc.text(res.title, 20, 38);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(58, 61, 66); // ink-2
+        
+        let yPos = 55;
+        const addLine = (text: string, bold = false) => {
+          if (bold) doc.setFont("helvetica", "bold");
+          else doc.setFont("helvetica", "normal");
+          doc.text(text, 20, yPos);
+          yPos += 7;
+        };
+
+        if (res.title.includes("Trainer's Playbook")) {
+          addLine("THE 30-MINUTE FOUNDATIONS BLOCK", true);
+          yPos += 2;
+          addLine("1. Give it the document: Do not ask the AI to remember clauses it has never seen.");
+          addLine("2. Do not trust unsourced numbers: Always ask 'where did that come from?'.");
+          yPos += 5;
+          addLine("SESSION TIMING:", true);
+          yPos += 2;
+          addLine("0:00 - 0:30 : Foundations (universal)");
+          addLine("0:30 - 1:00 : The room's real problem");
+          addLine("1:00 - 1:15 : Break");
+          addLine("1:15 - 2:40 : Hands-on Exercises (Synthetic -> Real Data)");
+          addLine("2:40 - 3:00 : Live Q&A");
+          yPos += 5;
+          addLine("FACILITATOR NOTE:", true);
+          yPos += 2;
+          addLine("Run the prompt comparison live on stage. The room does not need to be");
+          addLine("convinced AI is powerful; they need to see that a bad prompt makes it useless.");
+        } else if (res.title.includes("Prompt Engineering")) {
+          addLine("ANATOMY OF A GOOD PROMPT", true);
+          yPos += 2;
+          addLine("1. ROLE: Who the AI is playing (e.g. 'You are a contracts engineer at an EPC firm')");
+          addLine("2. CONTEXT: The document or situation (e.g. 'The tender below is for a PWD project')");
+          addLine("3. TASK: Exactly what you want done (e.g. 'Extract every obligation on the contractor')");
+          addLine("4. FORMAT: How the output should look (e.g. 'As a table with columns...')");
+          addLine("5. CONSTRAINT: What it must not do (e.g. 'Do not add any obligation not present')");
+          yPos += 5;
+          addLine("THE TWO-TAB HABIT:", true);
+          yPos += 2;
+          addLine("Keep the source open in one tab. Keep the AI open in the other.");
+          addLine("Every time you accept an answer, check it against the source.");
+          yPos += 5;
+          addLine("CITE IT BACK:", true);
+          yPos += 2;
+          addLine("Add this to every prompt: 'For every claim, quote the exact sentence");
+          addLine("and give its clause / section / page reference.'");
+        } else if (res.title.includes("Data Safety")) {
+          addLine("NEVER PASTE INTO A PUBLIC AI TOOL (ChatGPT, Claude)", true);
+          doc.setTextColor(160, 52, 34); // danger
+          yPos += 2;
+          addLine("X Anyone's Aadhaar, PAN, bank details, salary figure or personal address.");
+          addLine("X A live tender bid price before submission, or any competitor's price.");
+          addLine("X Signed contracts with clients or vendors, unless a redacted version.");
+          addLine("X Legal correspondence - notices sent to or received from lawyers.");
+          addLine("X Anything marked 'confidential' in a document header.");
+          yPos += 5;
+          doc.setTextColor(58, 61, 66);
+          addLine("FINE TO PASTE", true);
+          doc.setTextColor(78, 107, 46); // ok
+          yPos += 2;
+          addLine("√ Public tender documents downloaded from a client portal.");
+          addLine("√ Draft internal documents, once names and figures are placeholder-swapped.");
+          addLine("√ Blank templates and standard operating procedures (SOPs).");
+          addLine("√ Meeting notes (excluding confidential financial data).");
+        }
+
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Generated securely by the Suroj Buildcon x Be10x Platform`, 20, 280);
         doc.save(`${res.title.replace(/\s+/g, '_')}.pdf`);
       } else {
-        // Fallback for CSV/XLSX - generating a simple CSV
-        const content = `Category,Department,Headcount\nOperations,Civil,120\nOperations,MEP,45\nCommercial,Tendering,23`;
+        // Fallback for CSV/XLSX
+        const content = `Family,Department,Count,Topics\nWinning Work,Contract & Tendering,22,Obligation extraction\nWinning Work,Business Development,1,Tender queries\nNumbers,Cost Control,11,Budget vs actual\nNumbers,Planning,9,Schedule analysis\nNumbers,MEP Design,12,BBS checking\nSite,Purchase,11,Vendor comparison\nSite,V&M,5,Logbooks\nPeople,HR & Admin,23,Policy documents`;
         const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
