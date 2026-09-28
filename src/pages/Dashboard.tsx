@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, BookOpen, Layers, CalendarDays } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { sessions, globalStats } from '../data/sessions';
 import { motion } from 'framer-motion';
 
@@ -15,6 +15,13 @@ const Dashboard = () => {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
   };
 
+  const familyData = [
+    { name: "Winning Work", count: 42, color: "var(--color-rust)" },
+    { name: "Numbers, Drawings & Systems", count: 83, color: "var(--color-indigo)" },
+    { name: "Running Site & Materials", count: 34, color: "var(--color-ochre)" },
+    { name: "People & Communication", count: 25, color: "var(--color-moss)" },
+  ];
+
   return (
     <motion.div 
       initial="hidden" 
@@ -22,7 +29,16 @@ const Dashboard = () => {
       variants={containerVars}
       className="space-y-10"
     >
-      <motion.header variants={itemVars} className="relative overflow-hidden bg-ink text-paper p-10 md:p-16 rounded-xl shadow-2xl blueprint-bg border border-ink-2">
+      {/* Updated Header with Image Background and removed blueprint grid */}
+      <motion.header 
+        variants={itemVars} 
+        className="relative overflow-hidden bg-ink text-paper p-10 md:p-16 rounded-xl shadow-2xl border border-ink-2"
+        style={{
+          backgroundImage: 'linear-gradient(to right, rgba(20, 22, 26, 0.95) 0%, rgba(20, 22, 26, 0.7) 100%), url(/hero-bg.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
         <div className="relative z-10 max-w-3xl">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -33,24 +49,13 @@ const Dashboard = () => {
             <div className="w-2 h-2 bg-rust rounded-full mr-3 animate-pulse"></div>
             Suroj Buildcon × Be10x
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 font-serif italic">
+          <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 font-serif italic text-white drop-shadow-md">
             Eight sessions.<br/>One transformation system.
           </h1>
-          <p className="text-paper-3 text-lg max-w-xl">
+          <p className="text-paper-3 text-lg max-w-xl text-opacity-90">
             From workshop learning to repeatable AI-enabled workflows. Building the intelligent foundation for enterprise construction.
           </p>
         </div>
-        {/* Abstract decorative elements */}
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          className="absolute -right-20 -bottom-20 w-96 h-96 border border-rule/20 rounded-full opacity-20 pointer-events-none"
-        />
-        <motion.div 
-          animate={{ rotate: -360 }}
-          transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
-          className="absolute -right-10 -bottom-10 w-64 h-64 border border-rust/40 rounded-full opacity-40 pointer-events-none"
-        />
       </motion.header>
 
       {/* KPI Cards */}
@@ -88,7 +93,7 @@ const Dashboard = () => {
             <span className="w-1.5 h-6 bg-ink rounded-full mr-3"></span>
             Participants by Session
           </h3>
-          <div className="h-[280px]">
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sessions} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <XAxis type="number" hide />
@@ -115,34 +120,51 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Added Interactive Pie Chart */}
         <div className="bg-paper border border-rule-2 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col">
-          <h3 className="text-lg font-semibold mb-6 flex items-center">
+          <h3 className="text-lg font-semibold mb-2 flex items-center">
             <span className="w-1.5 h-6 bg-ink rounded-full mr-3"></span>
-            Learning Families
+            Distribution by Family
           </h3>
-          <div className="flex-1 flex flex-col justify-center gap-6">
-             {[
-               { name: "Winning Work", count: 42, color: "bg-rust" },
-               { name: "Numbers, Drawings & Systems", count: 83, color: "bg-indigo" },
-               { name: "Running Site & Materials", count: 34, color: "bg-ochre" },
-               { name: "People & Communication", count: 25, color: "bg-moss" },
-             ].map((f, index) => (
-               <div key={f.name} className="flex flex-col group cursor-default">
-                 <div className="flex justify-between text-sm mb-2">
-                   <span className="font-medium text-ink-2 group-hover:text-ink transition-colors">{f.name}</span>
-                   <span className="font-mono text-ink-3 font-semibold group-hover:text-ink transition-colors">{f.count} pax</span>
+          <div className="flex-1 flex flex-col md:flex-row items-center justify-between">
+             <div className="h-[220px] w-full md:w-1/2">
+               <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                   <Pie
+                     data={familyData}
+                     cx="50%"
+                     cy="50%"
+                     innerRadius={60}
+                     outerRadius={80}
+                     paddingAngle={5}
+                     dataKey="count"
+                     stroke="none"
+                     animationDuration={1500}
+                     animationBegin={400}
+                   >
+                     {familyData.map((entry, index) => (
+                       <Cell key={`cell-${index}`} fill={entry.color} />
+                     ))}
+                   </Pie>
+                   <Tooltip 
+                     contentStyle={{backgroundColor: '#14161A', color: '#F6F2E9', border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                     itemStyle={{color: '#EFE9DB'}}
+                   />
+                 </PieChart>
+               </ResponsiveContainer>
+             </div>
+             
+             <div className="w-full md:w-1/2 flex flex-col gap-4 mt-4 md:mt-0">
+               {familyData.map(f => (
+                 <div key={f.name} className="flex items-center group cursor-default">
+                   <div className="w-3 h-3 rounded-full mr-3 shrink-0" style={{ backgroundColor: f.color }}></div>
+                   <div className="flex-1">
+                     <div className="text-xs font-semibold text-ink leading-tight">{f.name}</div>
+                     <div className="text-[10px] font-mono text-ink-3 uppercase">{f.count} participants ({(f.count/184*100).toFixed(0)}%)</div>
+                   </div>
                  </div>
-                 <div className="w-full bg-paper-3 h-3 rounded-full overflow-hidden shadow-inner">
-                   <motion.div 
-                     initial={{ width: 0 }}
-                     whileInView={{ width: `${(f.count / 184) * 100}%` }}
-                     viewport={{ once: true }}
-                     transition={{ duration: 1, delay: 0.2 + index * 0.1, ease: "easeOut" }}
-                     className={`${f.color} h-full rounded-full`}
-                   ></motion.div>
-                 </div>
-               </div>
-             ))}
+               ))}
+             </div>
           </div>
         </div>
       </motion.section>
