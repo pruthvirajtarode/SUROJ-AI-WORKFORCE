@@ -14,7 +14,9 @@ import {
   FolderOpen,
   FileDown,
   Menu,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,6 +38,7 @@ const navItems = [
 
 export default function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const location = useLocation();
 
   // Close mobile menu on route change
@@ -52,28 +55,38 @@ export default function AppLayout() {
     }
   }, [mobileMenuOpen]);
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <>
-      <div className="p-6 border-b border-rule shrink-0">
-        <div className="font-mono text-xs tracking-wider text-ink-3 mb-1">SUROJ BUILDCON × BE10X</div>
-        <h1 className="font-sans font-semibold text-ink text-lg leading-tight">AI Workforce Transformation</h1>
+      <div className={`p-5 border-b border-rule shrink-0 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} h-[76px]`}>
+        {!collapsed && (
+          <h1 className="font-sans font-semibold text-ink text-lg leading-tight">AI Workforce Transformation</h1>
+        )}
       </div>
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto hide-scrollbar">
+      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto hide-scrollbar">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
+            title={collapsed ? item.label : undefined}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md font-sans text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-md font-sans text-sm transition-colors relative group",
                 isActive 
                   ? "bg-ink text-paper font-medium" 
-                  : "text-ink-2 hover:bg-paper-3 hover:text-ink"
+                  : "text-ink-2 hover:bg-paper-3 hover:text-ink",
+                collapsed && "justify-center px-0"
               )
             }
           >
-            <item.icon size={18} />
-            {item.label}
+            <item.icon size={20} className={collapsed ? "shrink-0" : ""} />
+            {!collapsed && <span>{item.label}</span>}
+            
+            {/* Tooltip for collapsed state */}
+            {collapsed && (
+              <div className="absolute left-full ml-4 px-2 py-1 bg-ink text-paper text-xs rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                {item.label}
+              </div>
+            )}
           </NavLink>
         ))}
       </nav>
@@ -85,8 +98,7 @@ export default function AppLayout() {
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-40 bg-paper border-b border-rule flex items-center justify-between p-4 shadow-sm">
         <div>
-          <div className="font-mono text-[10px] tracking-wider text-ink-3">SUROJ BUILDCON × BE10X</div>
-          <div className="font-semibold text-sm">AI Transformation</div>
+          <div className="font-semibold text-sm">AI Workforce Transformation</div>
         </div>
         <button 
           onClick={() => setMobileMenuOpen(true)}
@@ -123,16 +135,31 @@ export default function AppLayout() {
                   <X size={20} className="text-ink" />
                 </button>
               </div>
-              <SidebarContent />
+              <SidebarContent collapsed={false} />
             </motion.aside>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-rule-2 bg-paper-2 h-screen sticky top-0">
-        <SidebarContent />
-      </aside>
+      <motion.aside 
+        animate={{ width: desktopCollapsed ? 80 : 256 }}
+        transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+        className="hidden md:flex flex-col border-r border-rule-2 bg-paper-2 h-screen sticky top-0 z-30"
+      >
+        <SidebarContent collapsed={desktopCollapsed} />
+        
+        {/* Desktop Collapse Toggle */}
+        <div className="p-4 border-t border-rule flex justify-center">
+          <button 
+            onClick={() => setDesktopCollapsed(!desktopCollapsed)}
+            className="p-2 rounded-lg text-ink-3 hover:text-ink hover:bg-paper-3 transition-colors flex items-center justify-center w-full"
+            title={desktopCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {desktopCollapsed ? <ChevronRight size={20} /> : <div className="flex items-center gap-2"><ChevronLeft size={20} /><span className="text-sm font-medium">Collapse</span></div>}
+          </button>
+        </div>
+      </motion.aside>
 
       {/* Main Content */}
       <main className="flex-1 w-full min-w-0">
