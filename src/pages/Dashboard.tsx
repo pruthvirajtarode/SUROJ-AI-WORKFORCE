@@ -79,7 +79,7 @@ const Dashboard = () => {
         variants={itemVars} 
         className="relative overflow-hidden bg-ink text-paper p-10 md:p-16 rounded-xl shadow-2xl border border-ink-2"
         style={{
-          backgroundImage: 'linear-gradient(to right, rgba(20, 22, 26, 0.95) 0%, rgba(20, 22, 26, 0.7) 100%), url(/hero-bg.png)',
+          backgroundImage: 'linear-gradient(to right, rgba(20, 22, 26, 0.9) 0%, rgba(20, 22, 26, 0.5) 50%, rgba(20, 22, 26, 0.1) 100%), url(/hero-bg.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
