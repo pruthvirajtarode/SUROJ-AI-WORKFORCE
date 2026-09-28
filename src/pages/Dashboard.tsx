@@ -89,10 +89,11 @@ const Dashboard = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-mono text-sm text-ochre mb-4 uppercase tracking-widest flex items-center"
+            className="font-mono text-sm text-ochre mb-6 uppercase tracking-widest flex items-center gap-4"
           >
-            <div className="w-2 h-2 bg-rust rounded-full mr-3 animate-pulse"></div>
-            Suroj Buildcon × Be10x
+            <div className="w-2 h-2 bg-rust rounded-full animate-pulse"></div>
+            <img src="/be10x-logo.png" alt="Be10x Logo" className="h-6 md:h-8 object-contain" />
+            <span>SUROJ BUILDCON</span>
           </motion.div>
           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 font-serif italic text-white drop-shadow-md">
             Eight sessions.<br/>One transformation system.

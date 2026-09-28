@@ -60,11 +60,14 @@ export default function AppLayout() {
       <div className={`p-5 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center' : 'justify-center'} min-h-[84px]`}>
         {!collapsed ? (
           <>
-            <div className="font-mono text-sm font-bold tracking-widest text-ink mb-1.5 uppercase">SUROJ BUILDCON × BE10X</div>
+            <div className="flex items-center gap-3 mb-2">
+              <img src="/be10x-logo.png" alt="Be10x Logo" className="h-6 object-contain filter invert opacity-90" />
+              <div className="font-mono text-sm font-bold tracking-widest text-ink uppercase">SUROJ BUILDCON</div>
+            </div>
             <h1 className="font-sans font-medium text-ink-3 text-xs leading-tight uppercase tracking-wider">AI Workforce Transformation</h1>
           </>
         ) : (
-          <div className="font-mono font-bold text-xl text-ink" title="Suroj Buildcon x Be10x">SB</div>
+          <img src="/be10x-logo.png" alt="Be10x" className="h-6 w-auto object-contain filter invert opacity-90" title="Suroj Buildcon x Be10x" />
         )}
       </div>
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto hide-scrollbar">
@@ -102,8 +105,11 @@ export default function AppLayout() {
     <div className="min-h-screen flex flex-col md:flex-row bg-paper relative">
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-40 bg-paper border-b border-rule flex items-center justify-between p-4 shadow-sm">
-        <div>
-          <div className="font-semibold text-sm">AI Workforce Transformation</div>
+        <div className="flex items-center gap-3">
+          <img src="/be10x-logo.png" alt="Be10x Logo" className="h-5 object-contain filter invert opacity-90" />
+          <div>
+            <div className="font-semibold text-sm">AI Transformation</div>
+          </div>
         </div>
         <button 
           onClick={() => setMobileMenuOpen(true)}
