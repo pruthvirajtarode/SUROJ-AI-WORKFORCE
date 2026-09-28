@@ -60,9 +60,9 @@ export default function AppLayout() {
       <div className={`p-5 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center' : 'justify-center'} min-h-[84px]`}>
         {!collapsed ? (
           <>
-            <div className="flex items-center gap-4 mb-3">
-              <img src="/be10x-logo.png" alt="Be10x Logo" className="h-12 object-contain mix-blend-multiply" />
-              <div className="font-mono text-sm font-bold tracking-widest text-ink uppercase">SUROJ BUILDCON</div>
+            <div className="flex flex-col gap-2 mb-4">
+              <img src="/be10x-logo.png" alt="Be10x Logo" className="h-20 w-20 object-contain mix-blend-multiply drop-shadow-sm" />
+              <div className="font-mono text-base font-bold tracking-widest text-ink uppercase mt-2">SUROJ BUILDCON</div>
             </div>
             <h1 className="font-sans font-medium text-ink-3 text-xs leading-tight uppercase tracking-wider">AI Workforce Transformation</h1>
           </>
@@ -106,7 +106,7 @@ export default function AppLayout() {
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-40 bg-paper border-b border-rule flex items-center justify-between p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <img src="/be10x-logo.png" alt="Be10x Logo" className="h-8 object-contain mix-blend-multiply" />
+          <img src="/be10x-logo.png" alt="Be10x Logo" className="h-10 object-contain mix-blend-multiply" />
           <div>
             <div className="font-semibold text-sm">AI Transformation</div>
           </div>
