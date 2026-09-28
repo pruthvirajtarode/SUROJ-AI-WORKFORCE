@@ -124,7 +124,7 @@ const ProgrammeOverview = () => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.5, duration: 0.6 }}
-        className="mt-20 bg-ink text-paper p-8 md:p-10 rounded-xl text-center max-w-3xl mx-auto shadow-2xl blueprint-bg relative overflow-hidden border border-ink-2"
+        className="mt-20 bg-ink text-paper p-8 md:p-10 rounded-xl text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden border border-ink-2"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-rust opacity-10 rounded-full blur-2xl"></div>
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-ok opacity-10 rounded-full blur-2xl"></div>
