@@ -92,8 +92,10 @@ const Dashboard = () => {
             className="font-mono text-sm text-ochre mb-6 uppercase tracking-widest flex items-center gap-4"
           >
             <div className="w-2 h-2 bg-rust rounded-full animate-pulse"></div>
-            <img src="/be10x-logo.png" alt="Be10x Logo" className="h-6 md:h-8 object-contain" />
-            <span>SUROJ BUILDCON</span>
+            <div className="bg-white rounded-md p-1.5 flex items-center shadow-sm">
+              <img src="/be10x-logo.png" alt="Be10x Logo" className="h-10 md:h-12 object-contain" />
+            </div>
+            <span className="ml-1">SUROJ BUILDCON</span>
           </motion.div>
           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 font-serif italic text-white drop-shadow-md">
             Eight sessions.<br/>One transformation system.
