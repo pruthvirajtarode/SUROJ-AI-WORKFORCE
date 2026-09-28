@@ -1,5 +1,6 @@
 import React from 'react';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight, BookOpen, AlertTriangle, Lightbulb, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const caseStudies = [
   {
@@ -11,7 +12,7 @@ const caseStudies = [
     solution: "The tender team ran a delta-comparison prompt using an LLM. The AI flagged the exact clause where 'recovery at 20% progress' was changed to 'recovery at 10% progress'.",
     result: "The firm adjusted their working capital projection, saving an unexpected cash flow gap of ₹2.4Cr.",
     badge: "CASE STUDY",
-    color: "bg-rust/10 border-rust text-rust"
+    color: "rust"
   },
   {
     id: 2,
@@ -22,7 +23,7 @@ const caseStudies = [
     solution: "By feeding the dimensional constraints from the spec and the structural constraints into an AI analyzer prompt, the system flagged the spatial conflict before the priced BOQ was locked.",
     result: "Pre-bid query raised, design modified by client, avoiding a costly site-level variation request.",
     badge: "TRAINING SCENARIO",
-    color: "bg-indigo/10 border-indigo text-indigo"
+    color: "indigo"
   },
   {
     id: 3,
@@ -33,59 +34,115 @@ const caseStudies = [
     solution: "The procurement team used a 'Total Cost of Ownership' normalization prompt. The AI produced a leveled comparison table incorporating the time-value of money for the advance payment and the cost of site unloading.",
     result: "Vendor B was revealed to be 4% cheaper in total actual cost than Vendor A.",
     badge: "CASE STUDY",
-    color: "bg-ochre/10 border-ochre text-ochre"
+    color: "ochre"
   }
 ];
 
 const CaseStudies = () => {
+  const containerVars = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  
+  const itemVars = {
+    hidden: { opacity: 0, y: 30 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
+  const getColorClasses = (color: string) => {
+    switch(color) {
+      case 'rust': return 'bg-rust text-rust border-rust bg-rust/10';
+      case 'indigo': return 'bg-indigo text-indigo border-indigo bg-indigo/10';
+      case 'ochre': return 'bg-ochre text-ochre border-ochre bg-ochre/10';
+      default: return 'bg-ink text-ink border-ink bg-ink/10';
+    }
+  };
+
   return (
-    <div className="space-y-8 pb-12">
-      <div className="border-b border-rule-2 pb-6">
-        <h1 className="text-3xl font-semibold mb-4">Case Study Library</h1>
-        <p className="text-lg text-ink-2 font-serif italic max-w-2xl">
-          Real and illustrative scenarios demonstrating AI workflow integration.
-        </p>
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={containerVars}
+      className="space-y-8 pb-12 max-w-7xl mx-auto"
+    >
+      <div className="border-b border-rule-2 pb-8 flex items-end justify-between">
+        <div>
+          <div className="flex items-center text-ink-3 mb-2 font-mono text-xs tracking-widest uppercase">
+            <BookOpen size={16} className="mr-2" /> Library
+          </div>
+          <h1 className="text-3xl md:text-4xl font-semibold mb-4">Case Study Library</h1>
+          <p className="text-lg text-ink-2 font-serif italic max-w-2xl">
+            Real and illustrative scenarios demonstrating AI workflow integration.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {caseStudies.map(cs => (
-          <div key={cs.id} className="flex flex-col bg-paper border border-rule-2 rounded-md overflow-hidden hover:shadow-md transition-shadow">
-            <div className="p-6 flex-1 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <span className={`text-xs font-mono font-bold px-2 py-1 border rounded ${cs.color}`}>
-                  {cs.badge}
-                </span>
-                <span className="text-sm font-mono text-ink-3">{cs.session}</span>
+      <motion.div variants={containerVars} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {caseStudies.map((cs, i) => {
+          const colorClasses = getColorClasses(cs.color);
+          const colorBase = colorClasses.split(' ')[0].replace('bg-', '');
+          
+          return (
+            <motion.div 
+              key={cs.id} 
+              variants={itemVars}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              className="flex flex-col bg-paper border border-rule-2 rounded-xl overflow-hidden hover:shadow-xl hover:border-ink/30 transition-all duration-300 relative"
+            >
+              <div className={`h-2 w-full bg-${colorBase}`}></div>
+              <div className="p-6 flex-1 flex flex-col relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <span className={`text-[10px] font-mono font-bold px-2.5 py-1 border rounded-full shadow-sm ${colorClasses.split(' ')[1]} ${colorClasses.split(' ')[2]} ${colorClasses.split(' ')[3]}`}>
+                    {cs.badge}
+                  </span>
+                  <span className="text-[10px] font-mono text-ink-3 uppercase tracking-widest bg-paper-2 px-2 py-1 rounded">{cs.session}</span>
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-4 leading-tight">{cs.title}</h3>
+                
+                <div className="bg-paper-2 p-4 rounded-lg border-l-4 border-rule mb-6 italic text-sm text-ink-2 relative overflow-hidden">
+                  <div className="absolute top-2 right-2 text-rule-2/30 font-serif text-6xl leading-none">"</div>
+                  <span className="relative z-10">{cs.context}</span>
+                </div>
+                
+                <div className="space-y-5 flex-1">
+                  <div className="relative pl-6">
+                    <AlertTriangle size={16} className={`absolute left-0 top-0.5 text-${colorBase}`} />
+                    <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">The Problem</div>
+                    <p className="text-sm leading-relaxed">{cs.problem}</p>
+                  </div>
+                  
+                  <div className="relative pl-6">
+                    <Lightbulb size={16} className={`absolute left-0 top-0.5 text-${colorBase}`} />
+                    <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">AI Approach</div>
+                    <p className="text-sm leading-relaxed">{cs.solution}</p>
+                  </div>
+                  
+                  <div className="relative pl-6 bg-[#E6EBDA] p-3 rounded-lg border border-ok/20 -ml-2">
+                    <TrendingUp size={16} className="absolute left-2 top-3.5 text-ok" />
+                    <div className="text-xs font-mono font-bold text-ok uppercase mb-1">Business Impact</div>
+                    <p className="text-sm font-semibold text-ink">{cs.result}</p>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold mb-3">{cs.title}</h3>
-              <p className="text-ink-2 mb-6 italic border-l-2 border-rule-2 pl-3 py-1">"{cs.context}"</p>
               
-              <div className="space-y-4 flex-1">
-                <div>
-                  <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">The Problem</div>
-                  <p className="text-sm">{cs.problem}</p>
+              <div className="bg-paper-2 border-t border-rule-2 p-5 flex justify-between items-center group cursor-pointer hover:bg-paper-3 transition-colors">
+                <div className="flex items-center text-sm font-bold text-ink-2 group-hover:text-ink transition-colors">
+                  <BookOpen size={16} className="mr-2" />
+                  View Full Workflow
                 </div>
-                <div>
-                  <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">AI Approach</div>
-                  <p className="text-sm">{cs.solution}</p>
-                </div>
-                <div>
-                  <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">Result</div>
-                  <p className="text-sm font-semibold text-ok">{cs.result}</p>
-                </div>
+                <motion.div 
+                  initial={{ x: 0 }}
+                  whileHover={{ x: 5 }}
+                >
+                  <ArrowRight size={18} className="text-ink-2 group-hover:text-ink" />
+                </motion.div>
               </div>
-            </div>
-            <div className="bg-paper-2 border-t border-rule-2 p-4 flex justify-between items-center">
-              <div className="flex items-center text-sm font-semibold text-ink-2 hover:text-rust transition-colors cursor-pointer">
-                <BookOpen size={16} className="mr-2" />
-                View Full Workflow
-              </div>
-              <ArrowRight size={16} className="text-rule-2" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+            </motion.div>
+          )
+        })}
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -1,14 +1,38 @@
 import React from 'react';
 import { Users, BookOpen, Layers, CalendarDays } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { sessions, globalStats } from '../data/sessions';
+import { motion } from 'framer-motion';
 
 const Dashboard = () => {
+  const containerVars = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  
+  const itemVars = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="space-y-10 animate-fade-in">
-      <header className="relative overflow-hidden bg-ink text-paper p-10 md:p-16 rounded-lg shadow-xl blueprint-bg">
+    <motion.div 
+      initial="hidden" 
+      animate="show" 
+      variants={containerVars}
+      className="space-y-10"
+    >
+      <motion.header variants={itemVars} className="relative overflow-hidden bg-ink text-paper p-10 md:p-16 rounded-xl shadow-2xl blueprint-bg border border-ink-2">
         <div className="relative z-10 max-w-3xl">
-          <div className="font-mono text-sm text-ochre mb-4 uppercase tracking-widest">Suroj Buildcon × Be10x</div>
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="font-mono text-sm text-ochre mb-4 uppercase tracking-widest flex items-center"
+          >
+            <div className="w-2 h-2 bg-rust rounded-full mr-3 animate-pulse"></div>
+            Suroj Buildcon × Be10x
+          </motion.div>
           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 font-serif italic">
             Eight sessions.<br/>One transformation system.
           </h1>
@@ -17,45 +41,72 @@ const Dashboard = () => {
           </p>
         </div>
         {/* Abstract decorative elements */}
-        <div className="absolute -right-20 -bottom-20 w-96 h-96 border border-rule/20 rounded-full opacity-20"></div>
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 border border-rust/40 rounded-full opacity-40"></div>
-      </header>
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+          className="absolute -right-20 -bottom-20 w-96 h-96 border border-rule/20 rounded-full opacity-20 pointer-events-none"
+        />
+        <motion.div 
+          animate={{ rotate: -360 }}
+          transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
+          className="absolute -right-10 -bottom-10 w-64 h-64 border border-rust/40 rounded-full opacity-40 pointer-events-none"
+        />
+      </motion.header>
 
       {/* KPI Cards */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.section variants={containerVars} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
-          { label: 'Participants', value: globalStats.totalParticipants, icon: Users, color: 'text-rust' },
-          { label: 'Sessions', value: globalStats.totalSessions, icon: BookOpen, color: 'text-indigo' },
-          { label: 'Learning Families', value: globalStats.learningFamilies, icon: Layers, color: 'text-steel' },
-          { label: 'Workshop Days', value: globalStats.workshopDays, icon: CalendarDays, color: 'text-ochre' },
+          { label: 'Participants', value: globalStats.totalParticipants, icon: Users, color: 'text-rust', bg: 'bg-rust/10', border: 'border-rust/20' },
+          { label: 'Sessions', value: globalStats.totalSessions, icon: BookOpen, color: 'text-indigo', bg: 'bg-indigo/10', border: 'border-indigo/20' },
+          { label: 'Learning Families', value: globalStats.learningFamilies, icon: Layers, color: 'text-steel', bg: 'bg-steel/10', border: 'border-steel/20' },
+          { label: 'Workshop Days', value: globalStats.workshopDays, icon: CalendarDays, color: 'text-ochre', bg: 'bg-ochre/10', border: 'border-ochre/20' },
         ].map((kpi, i) => (
-          <div key={i} className="bg-paper-2 border border-rule-2 p-6 rounded-md hover:shadow-md transition-shadow">
-            <kpi.icon className={`w-8 h-8 ${kpi.color} mb-4`} />
-            <div className="text-3xl font-semibold font-sans">{kpi.value}</div>
-            <div className="text-sm font-mono text-ink-3 uppercase mt-1 tracking-wider">{kpi.label}</div>
-          </div>
+          <motion.div 
+            key={i} 
+            variants={itemVars}
+            whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+            className={`bg-paper-2 border p-6 rounded-xl shadow-sm relative overflow-hidden transition-all ${kpi.border}`}
+          >
+            <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-full ${kpi.bg} -mr-4 -mt-4 opacity-50`}></div>
+            <kpi.icon className={`w-8 h-8 ${kpi.color} mb-4 relative z-10`} />
+            <motion.div 
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4 + i * 0.1, type: "spring" }}
+              className="text-4xl font-semibold font-sans relative z-10"
+            >
+              {kpi.value}
+            </motion.div>
+            <div className="text-xs font-mono text-ink-3 uppercase mt-2 tracking-wider relative z-10">{kpi.label}</div>
+          </motion.div>
         ))}
-      </section>
+      </motion.section>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-paper border border-rule-2 p-6 rounded-md shadow-sm">
-          <h3 className="text-lg font-semibold mb-6">Participants by Session</h3>
-          <div className="h-64">
+      <motion.section variants={itemVars} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-paper border border-rule-2 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <h3 className="text-lg font-semibold mb-6 flex items-center">
+            <span className="w-1.5 h-6 bg-ink rounded-full mr-3"></span>
+            Participants by Session
+          </h3>
+          <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sessions} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <XAxis type="number" />
-                <YAxis dataKey="title" type="category" width={150} tick={{fontSize: 12}} />
-                <Tooltip cursor={{fill: '#EFE9DB'}} contentStyle={{backgroundColor: '#14161A', color: '#F6F2E9', border: 'none'}} />
-                <Bar dataKey="headcount" radius={[0, 4, 4, 0]}>
+                <XAxis type="number" hide />
+                <YAxis dataKey="title" type="category" width={160} tick={{fontSize: 12, fontWeight: 500}} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  cursor={{fill: 'var(--color-paper-2)', radius: 4}} 
+                  contentStyle={{backgroundColor: '#14161A', color: '#F6F2E9', border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                />
+                <Bar dataKey="headcount" radius={[0, 4, 4, 0]} barSize={24} animationDuration={1500}>
                   {sessions.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={
-                      entry.color === 'rust' ? '#B0431E' :
-                      entry.color === 'brick' ? '#7A2E1F' :
-                      entry.color === 'indigo' ? '#2E3F63' :
-                      entry.color === 'steel' ? '#35566B' :
-                      entry.color === 'slate' ? '#445362' :
-                      entry.color === 'ochre' ? '#B58022' :
-                      entry.color === 'iron' ? '#4A4A4A' : '#5C6A3A'
+                      entry.color === 'rust' ? 'var(--color-rust)' :
+                      entry.color === 'brick' ? 'var(--color-brick)' :
+                      entry.color === 'indigo' ? 'var(--color-indigo)' :
+                      entry.color === 'steel' ? 'var(--color-steel)' :
+                      entry.color === 'slate' ? 'var(--color-slate)' :
+                      entry.color === 'ochre' ? 'var(--color-ochre)' :
+                      entry.color === 'iron' ? 'var(--color-iron)' : 'var(--color-moss)'
                     } />
                   ))}
                 </Bar>
@@ -64,32 +115,38 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-paper border border-rule-2 p-6 rounded-md shadow-sm flex flex-col justify-between">
-          <h3 className="text-lg font-semibold mb-2">Learning Families</h3>
-          <div className="flex-1 flex items-center justify-center">
-            {/* Simple static representaton if PieChart is too big, let's use a nice styled list for families */}
-            <div className="w-full space-y-4">
-               {[
-                 { name: "Winning Work", count: 42, color: "bg-rust" },
-                 { name: "Numbers, Drawings & Systems", count: 83, color: "bg-indigo" },
-                 { name: "Running Site & Materials", count: 34, color: "bg-ochre" },
-                 { name: "People & Communication", count: 25, color: "bg-moss" },
-               ].map(f => (
-                 <div key={f.name} className="flex flex-col">
-                   <div className="flex justify-between text-sm mb-1">
-                     <span className="font-medium text-ink-2">{f.name}</span>
-                     <span className="font-mono text-ink-3">{f.count} participants</span>
-                   </div>
-                   <div className="w-full bg-paper-3 h-2 rounded-full overflow-hidden">
-                     <div className={`${f.color} h-full`} style={{ width: `${(f.count / 184) * 100}%` }}></div>
-                   </div>
+        <div className="bg-paper border border-rule-2 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          <h3 className="text-lg font-semibold mb-6 flex items-center">
+            <span className="w-1.5 h-6 bg-ink rounded-full mr-3"></span>
+            Learning Families
+          </h3>
+          <div className="flex-1 flex flex-col justify-center gap-6">
+             {[
+               { name: "Winning Work", count: 42, color: "bg-rust" },
+               { name: "Numbers, Drawings & Systems", count: 83, color: "bg-indigo" },
+               { name: "Running Site & Materials", count: 34, color: "bg-ochre" },
+               { name: "People & Communication", count: 25, color: "bg-moss" },
+             ].map((f, index) => (
+               <div key={f.name} className="flex flex-col group cursor-default">
+                 <div className="flex justify-between text-sm mb-2">
+                   <span className="font-medium text-ink-2 group-hover:text-ink transition-colors">{f.name}</span>
+                   <span className="font-mono text-ink-3 font-semibold group-hover:text-ink transition-colors">{f.count} pax</span>
                  </div>
-               ))}
-            </div>
+                 <div className="w-full bg-paper-3 h-3 rounded-full overflow-hidden shadow-inner">
+                   <motion.div 
+                     initial={{ width: 0 }}
+                     whileInView={{ width: `${(f.count / 184) * 100}%` }}
+                     viewport={{ once: true }}
+                     transition={{ duration: 1, delay: 0.2 + index * 0.1, ease: "easeOut" }}
+                     className={`${f.color} h-full rounded-full`}
+                   ></motion.div>
+                 </div>
+               </div>
+             ))}
           </div>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 };
 
