@@ -201,7 +201,7 @@ const PromptLibrary = () => {
           <p className="text-lg">No prompts found matching "{search}"</p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

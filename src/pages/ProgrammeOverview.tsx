@@ -2,12 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const ProgrammeOverview = () => {
-  const containerVars = {
+  const containerVars: any = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.15 } }
   };
   
-  const stepVars = {
+  const stepVars: any = {
     hidden: { opacity: 0, x: -30 },
     show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 200, damping: 20 } }
   };
@@ -167,7 +167,7 @@ const ProgrammeOverview = () => {
           </motion.div>
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
