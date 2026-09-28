@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, AlertTriangle, Lightbulb, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -126,7 +127,7 @@ const CaseStudies = () => {
                 </div>
               </div>
               
-              <div className="bg-paper-2 border-t border-rule-2 p-5 flex justify-between items-center group cursor-pointer hover:bg-paper-3 transition-colors">
+              <Link to="/workflow-lab" className="bg-paper-2 border-t border-rule-2 p-5 flex justify-between items-center group cursor-pointer hover:bg-paper-3 transition-colors block">
                 <div className="flex items-center text-sm font-bold text-ink-2 group-hover:text-ink transition-colors">
                   <BookOpen size={16} className="mr-2" />
                   View Full Workflow
@@ -137,7 +138,7 @@ const CaseStudies = () => {
                 >
                   <ArrowRight size={18} className="text-ink-2 group-hover:text-ink" />
                 </motion.div>
-              </div>
+              </Link>
             </motion.div>
           )
         })}
