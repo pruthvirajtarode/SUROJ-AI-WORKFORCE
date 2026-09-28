@@ -1,10 +1,13 @@
-import React from 'react';
-import { Users, BookOpen, Layers, CalendarDays } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, BookOpen, Layers, CalendarDays, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { sessions, globalStats } from '../data/sessions';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 
 const Dashboard = () => {
+  const [showQR, setShowQR] = useState(false);
+
   const containerVars: any = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -29,6 +32,48 @@ const Dashboard = () => {
       variants={containerVars}
       className="space-y-10"
     >
+      {/* Zoomed QR Modal */}
+      <AnimatePresence>
+        {showQR && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/90 backdrop-blur-sm p-6"
+            onClick={() => setShowQR(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-paper p-8 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm w-full relative"
+            >
+              <button 
+                onClick={() => setShowQR(false)}
+                className="absolute top-4 right-4 p-2 bg-paper-2 hover:bg-paper-3 rounded-full transition-colors"
+              >
+                <X size={20} className="text-ink-2" />
+              </button>
+              
+              <h3 className="text-2xl font-semibold mb-2">Scan to View Mobile</h3>
+              <p className="text-ink-3 text-sm text-center mb-8">Point your phone's camera at this QR code to view the live dashboard on your device.</p>
+              
+              <div className="bg-white p-6 rounded-xl shadow-inner border border-rule">
+                <QRCodeSVG 
+                  value="https://suroj-ai-workforce.vercel.app/"
+                  size={240}
+                  bgColor={"#ffffff"}
+                  fgColor={"#14161A"}
+                  level={"Q"}
+                />
+              </div>
+              <p className="font-mono text-xs text-ink-3 mt-6 uppercase tracking-widest">suroj-ai-workforce.vercel.app</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Updated Header with Image Background and removed blueprint grid */}
       <motion.header 
         variants={itemVars} 
@@ -55,6 +100,23 @@ const Dashboard = () => {
           <p className="text-paper-3 text-lg max-w-xl text-opacity-90">
             From workshop learning to repeatable AI-enabled workflows. Building the intelligent foundation for enterprise construction.
           </p>
+        </div>
+
+        {/* QR Code for Mobile Scanning */}
+        <div 
+          onClick={() => setShowQR(true)}
+          className="absolute top-6 right-6 hidden md:flex flex-col items-center bg-paper/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 hover:bg-paper/30 transition-colors shadow-lg z-20 cursor-zoom-in group"
+        >
+          <div className="bg-white/90 p-2 rounded-lg group-hover:bg-white transition-colors">
+            <QRCodeSVG 
+              value="https://suroj-ai-workforce.vercel.app/"
+              size={64}
+              bgColor={"transparent"}
+              fgColor={"#14161A"} // text-ink color
+              level={"L"}
+            />
+          </div>
+          <span className="text-[10px] font-mono mt-2 text-paper uppercase tracking-widest text-center leading-tight">Scan for<br/>Mobile</span>
         </div>
       </motion.header>
 

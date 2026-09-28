@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileDown, Link as LinkIcon, FileText, CheckCircle, Loader2, FileSpreadsheet, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { jsPDF } from 'jspdf';
 
 const ResourceCentre = () => {
   const [downloading, setDownloading] = useState<Record<number, boolean>>({});
@@ -22,16 +23,29 @@ const ResourceCentre = () => {
     // Simulate network delay for realism
     setTimeout(() => {
       // Trigger actual file download
-      const content = `Suroj Buildcon x Be10x AI Transformation Program\n\nDocument: ${res.title}\nType: ${res.type}\n\nThis is a placeholder document generated for the demonstration.`;
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${res.title.replace(/\s+/g, '_')}.${res.type.toLowerCase()}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (res.type === 'PDF') {
+        const doc = new jsPDF();
+        doc.setFontSize(22);
+        doc.text(`Suroj Buildcon x Be10x AI Transformation`, 20, 30);
+        doc.setFontSize(16);
+        doc.text(res.title, 20, 50);
+        doc.setFontSize(12);
+        doc.text(`This is an officially generated document for the workshop.`, 20, 70);
+        doc.text(`Confidential - For Internal Use Only`, 20, 90);
+        doc.save(`${res.title.replace(/\s+/g, '_')}.pdf`);
+      } else {
+        // Fallback for CSV/XLSX - generating a simple CSV
+        const content = `Category,Department,Headcount\nOperations,Civil,120\nOperations,MEP,45\nCommercial,Tendering,23`;
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${res.title.replace(/\s+/g, '_')}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
 
       // Update UI state
       setDownloading(prev => ({ ...prev, [res.id]: false }));
