@@ -57,9 +57,14 @@ export default function AppLayout() {
 
   const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <>
-      <div className={`p-5 border-b border-rule shrink-0 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} h-[76px]`}>
-        {!collapsed && (
-          <h1 className="font-sans font-semibold text-ink text-lg leading-tight">AI Workforce Transformation</h1>
+      <div className={`p-5 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center' : 'justify-center'} min-h-[84px]`}>
+        {!collapsed ? (
+          <>
+            <div className="font-mono text-sm font-bold tracking-widest text-ink mb-1.5 uppercase">SUROJ BUILDCON × BE10X</div>
+            <h1 className="font-sans font-medium text-ink-3 text-xs leading-tight uppercase tracking-wider">AI Workforce Transformation</h1>
+          </>
+        ) : (
+          <div className="font-mono font-bold text-xl text-ink" title="Suroj Buildcon x Be10x">SB</div>
         )}
       </div>
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto hide-scrollbar">
