@@ -369,7 +369,7 @@ const SessionDetail = () => {
 
                 {/* ─── AGENDA ─── */}
                 {activeTab === 'agenda' && (
-                  <div className="space-y-6 max-w-3xl">
+                  <div className="space-y-6 w-full">
                     <h2 className="text-xl font-semibold">Session Agenda</h2>
                     <div className="space-y-2">
                       {detail.agenda.map((item, i) => {
@@ -419,7 +419,7 @@ const SessionDetail = () => {
 
                 {/* ─── THEORY ─── */}
                 {activeTab === 'theory' && (
-                  <div className="space-y-6 max-w-3xl">
+                  <div className="space-y-6 w-full">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                       <span style={{ color: accentColor }}>✦</span> Theoretical Foundation
                     </h2>
@@ -458,7 +458,7 @@ const SessionDetail = () => {
 
                 {/* ─── PROMPTS ─── */}
                 {activeTab === 'prompts' && (
-                  <div className="space-y-6 max-w-3xl">
+                  <div className="space-y-6 w-full">
                     <h2 className="text-xl font-semibold">Prompt Patterns for This Room</h2>
                     <p className="text-sm text-ink-2">
                       These prompts are designed for {session.title}. Each follows the five-part anatomy:
@@ -499,7 +499,7 @@ RULES:
 
                 {/* ─── DATASET ─── */}
                 {activeTab === 'dataset' && (
-                  <div className="space-y-6 max-w-3xl">
+                  <div className="space-y-6 w-full">
                     <h2 className="text-xl font-semibold">Synthetic Datasets</h2>
                     <p className="text-sm text-ink-2 leading-relaxed">
                       Every company name, employee name, GSTIN, PAN, and financial figure below is synthetic.
@@ -536,7 +536,7 @@ RULES:
 
                 {/* ─── EXERCISES ─── */}
                 {activeTab === 'exercise' && (
-                  <div className="space-y-6 max-w-4xl">
+                  <div className="space-y-6 w-full">
                     <h2 className="text-xl font-semibold">Hands-On Exercises</h2>
 
                     {detail.exercises.map((ex, i) => (
@@ -586,7 +586,7 @@ RULES:
 
                 {/* ─── CHARTS ─── */}
                 {activeTab === 'charts' && (
-                  <div className="space-y-8 max-w-4xl">
+                  <div className="space-y-8 w-full">
                     <h2 className="text-xl font-semibold">Data & Impact Visualisations</h2>
 
                     <div className="grid md:grid-cols-2 gap-8">

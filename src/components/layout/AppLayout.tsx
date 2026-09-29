@@ -68,7 +68,7 @@ export default function AppLayout() {
             <img
               src="/suroj-logo.svg"
               alt="Suroj Buildcon"
-              className="h-20 w-auto rounded-lg object-contain mb-2"
+              className="h-28 w-auto rounded-lg object-contain mb-3"
             />
             {/* thin rule */}
             <div className="h-px bg-rule w-full my-2" />
