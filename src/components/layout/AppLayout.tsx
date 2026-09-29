@@ -68,7 +68,7 @@ export default function AppLayout() {
             <img
               src="/suroj-logo.svg"
               alt="Suroj Buildcon"
-              className="h-12 w-12 rounded-xl object-contain shadow-sm mb-2"
+              className="h-20 w-auto rounded-lg object-contain mb-2"
             />
             {/* thin rule */}
             <div className="h-px bg-rule w-full my-2" />
@@ -116,8 +116,8 @@ export default function AppLayout() {
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-40 bg-paper border-b border-rule flex items-center justify-between p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <img src="/suroj-logo.svg" alt="Suroj Buildcon" className="h-10 w-10 rounded-lg object-contain" />
-          <img src="/be10x-logo.png" alt="Be10x" className="h-7 object-contain mix-blend-multiply" />
+          <img src="/suroj-logo.svg" alt="Suroj Buildcon" className="h-10 w-auto rounded-lg object-contain" />
+          <img src="/be10x-logo.png" alt="Be10x" className="h-6 object-contain mix-blend-multiply" />
         </div>
         <button 
           onClick={() => setMobileMenuOpen(true)}
