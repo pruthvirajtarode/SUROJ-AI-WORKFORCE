@@ -6,7 +6,8 @@ import {
   ArrowLeft, Users, FileText, CheckCircle2, BookOpen,
   Wrench, Database, PlayCircle, MessageSquare, Clock,
   AlertTriangle, ChevronDown, ChevronUp, BarChart2,
-  PieChart as PieChartIcon, TrendingUp
+  PieChart as PieChartIcon, TrendingUp, Copy, ExternalLink,
+  Check, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -97,31 +98,131 @@ const PieChart = ({ data }: { data: { label: string; value: number; color?: stri
   );
 };
 
-// ─── Collapsible Dataset Block ─────────────────────────────────────────────────
+// ─── Interactive Dataset Block ────────────────────────────────────────────────
 
-const DatasetBlock = ({ title, content }: { title: string; content: string }) => {
+const InteractiveDataset = ({ title, content }: { title: string; content: string }) => {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback for browsers without clipboard API
+      const el = document.createElement('textarea');
+      el.value = content;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const openInChatGPT = () => {
+    const encoded = encodeURIComponent(
+      `I am working on an AI training session for Suroj Buildcon construction company. Below is a synthetic dataset for a hands-on exercise. Please help me work through it using structured extraction and analysis.\n\n${content}`
+    );
+    window.open(`https://chat.openai.com/?q=${encoded}`, '_blank');
+  };
+
+  const openInClaude = () => {
+    // Claude doesn't support URL pre-fill but we copy and open
+    handleCopy();
+    window.open('https://claude.ai/new', '_blank');
+  };
+
   return (
-    <div className="border border-rule-2 rounded mt-3">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-3 font-mono text-xs text-ink bg-paper-3 hover:bg-paper-2 transition-colors rounded text-left"
-      >
-        <span>▸ {title}</span>
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </button>
+    <div className="border border-rule-2 rounded-md overflow-hidden shadow-sm">
+      {/* Header bar */}
+      <div className="bg-paper-3 border-b border-rule flex items-center justify-between px-4 py-2">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-2 font-mono text-xs font-bold text-ink uppercase tracking-wider flex-1 text-left"
+        >
+          {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+          {title}
+        </button>
+        {/* Action buttons — always visible */}
+        <div className="flex items-center gap-2 ml-3">
+          <button
+            onClick={handleCopy}
+            title="Copy dataset to clipboard"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono border border-rule-2 bg-paper hover:bg-paper-2 transition-colors text-ink-2 hover:text-ink"
+          >
+            {copied ? <Check size={11} className="text-ok" /> : <Copy size={11} />}
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          <button
+            onClick={openInClaude}
+            title="Copy dataset then open Claude AI"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono border border-rule-2 bg-[#D97757] text-white hover:bg-[#c5623f] transition-colors"
+          >
+            <Zap size={11} />
+            Claude
+          </button>
+          <button
+            onClick={openInChatGPT}
+            title="Open dataset in ChatGPT"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono bg-[#10A37F] text-white hover:bg-[#0d8f6e] transition-colors"
+          >
+            <ExternalLink size={11} />
+            ChatGPT
+          </button>
+        </div>
+      </div>
+
+      {/* Expandable content */}
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <pre className="p-4 font-mono text-[11px] leading-relaxed whitespace-pre-wrap overflow-x-auto text-ink-2 bg-[#FDFBF5] border-t border-rule max-h-80 overflow-y-auto">
-              {content}
-            </pre>
+            <div className="relative">
+              <pre className="p-4 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-ink-2 bg-[#FDFBF5] max-h-96 overflow-y-auto border-t border-rule">
+                {content}
+              </pre>
+              {/* Floating copy button inside content */}
+              <button
+                onClick={handleCopy}
+                className="absolute top-3 right-3 p-1.5 bg-paper border border-rule rounded shadow text-ink-3 hover:text-ink transition-colors"
+                title="Copy"
+              >
+                {copied ? <Check size={12} className="text-ok" /> : <Copy size={12} />}
+              </button>
+            </div>
+            {/* Bottom action strip */}
+            <div className="bg-paper-3 border-t border-rule px-4 py-2 flex items-center gap-3 flex-wrap">
+              <span className="text-[10px] font-mono text-ink-3 mr-auto">
+                {content.split('\n').length} lines · {(content.length / 1024).toFixed(1)} KB
+              </span>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono border border-rule-2 bg-paper hover:bg-paper-2 transition-colors text-ink-2"
+              >
+                {copied ? <Check size={11} className="text-ok" /> : <Copy size={11} />}
+                {copied ? 'Copied to clipboard!' : 'Copy all data'}
+              </button>
+              <button
+                onClick={openInClaude}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-[#D97757] text-white hover:bg-[#c5623f] transition-colors"
+              >
+                <Zap size={11} /> Copy &amp; Open Claude
+              </button>
+              <button
+                onClick={openInChatGPT}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono bg-[#10A37F] text-white hover:bg-[#0d8f6e] transition-colors"
+              >
+                <ExternalLink size={11} /> Open in ChatGPT
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -413,7 +514,7 @@ RULES:
                     {detail.exercises.map((ex, i) =>
                       ex.dataset ? (
                         <div key={i}>
-                          <DatasetBlock
+                        <InteractiveDataset
                             title={`DATASET · ${ex.title}`}
                             content={ex.dataset}
                           />
@@ -455,7 +556,7 @@ RULES:
                             <p className="text-sm text-ink-2 leading-relaxed">{ex.setup}</p>
                           </div>
                           {ex.dataset && (
-                            <DatasetBlock title="SYNTHETIC DATA FOR THIS EXERCISE" content={ex.dataset} />
+                          <InteractiveDataset title="SYNTHETIC DATA FOR THIS EXERCISE" content={ex.dataset} />
                           )}
                           <div className="bg-paper-2 border border-rule rounded p-4">
                             <div className="font-mono text-xs font-bold text-ink-3 uppercase mb-2 flex items-center gap-1">

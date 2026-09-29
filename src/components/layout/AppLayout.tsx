@@ -61,17 +61,29 @@ export default function AppLayout() {
 
   const SidebarContent = ({ collapsed = false, location, setMobileMenuOpen }: { collapsed?: boolean, location?: any, setMobileMenuOpen?: (v: boolean) => void }) => (
     <>
-      <div className={`p-5 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center' : 'justify-center'} min-h-[84px]`}>
+      <div className={`p-4 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center py-4' : 'justify-center'}`}>
         {!collapsed ? (
           <>
-            <div className="flex flex-col gap-2 mb-4">
-              <img src="/be10x-logo.png" alt="Be10x Logo" className="h-20 w-20 object-contain mix-blend-multiply drop-shadow-sm" />
-              <div className="font-mono text-base font-bold tracking-widest text-ink uppercase mt-2">SUROJ BUILDCON</div>
+            {/* Logos row: Suroj + Be10x */}
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src="/suroj-logo.svg"
+                alt="Suroj Buildcon"
+                className="h-14 w-14 rounded-lg object-contain shadow-sm"
+              />
+              <div className="flex flex-col gap-0.5">
+                <div className="font-mono text-sm font-bold tracking-widest text-ink uppercase leading-tight">SUROJ BUILDCON</div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono text-ink-3 uppercase tracking-widest">×</span>
+                  <img src="/be10x-logo.png" alt="Be10x" className="h-5 object-contain mix-blend-multiply" />
+                </div>
+              </div>
             </div>
-            <h1 className="font-sans font-medium text-ink-3 text-xs leading-tight uppercase tracking-wider">AI Workforce Transformation</h1>
+            <div className="h-px bg-rule w-full my-1" />
+            <p className="font-sans font-medium text-ink-3 text-[10px] leading-tight uppercase tracking-wider mt-1">AI Workforce Transformation</p>
           </>
         ) : (
-          <img src="/be10x-logo.png" alt="Be10x" className="h-6 w-auto object-contain filter invert opacity-90" title="Suroj Buildcon x Be10x" />
+          <img src="/suroj-logo.svg" alt="Suroj" className="h-9 w-9 rounded object-contain" title="Suroj Buildcon × Be10x" />
         )}
       </div>
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto hide-scrollbar">
@@ -110,9 +122,13 @@ export default function AppLayout() {
       {/* Mobile Header */}
       <div className="md:hidden sticky top-0 z-40 bg-paper border-b border-rule flex items-center justify-between p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <img src="/be10x-logo.png" alt="Be10x Logo" className="h-10 object-contain mix-blend-multiply" />
+          <img src="/suroj-logo.svg" alt="Suroj Buildcon" className="h-10 w-10 rounded object-contain" />
           <div>
-            <div className="font-semibold text-sm">AI Transformation</div>
+            <div className="font-bold text-sm tracking-wide">SUROJ BUILDCON</div>
+            <div className="flex items-center gap-1">
+              <span className="text-[9px] font-mono text-ink-3">×</span>
+              <img src="/be10x-logo.png" alt="Be10x" className="h-4 object-contain mix-blend-multiply" />
+            </div>
           </div>
         </div>
         <button 
