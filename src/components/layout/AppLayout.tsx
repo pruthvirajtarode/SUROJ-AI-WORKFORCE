@@ -73,7 +73,7 @@ export default function AppLayout() {
             {/* thin rule */}
             <div className="h-px bg-rule w-full my-2" />
             {/* Be10x logo — separate below */}
-            <img src="/be10x-logo.png" alt="Be10x" className="h-7 object-contain mix-blend-multiply mb-1" />
+            <img src="/be10x-logo.png" alt="Be10x" className="h-10 object-contain mix-blend-multiply mb-2" />
             <p className="font-sans font-medium text-ink-3 text-[10px] leading-tight uppercase tracking-wider">AI Workforce Transformation</p>
           </>
         ) : (
@@ -117,7 +117,7 @@ export default function AppLayout() {
       <div className="md:hidden sticky top-0 z-40 bg-paper border-b border-rule flex items-center justify-between p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <img src="/suroj-logo.svg" alt="Suroj Buildcon" className="h-10 w-auto rounded-lg object-contain" />
-          <img src="/be10x-logo.png" alt="Be10x" className="h-6 object-contain mix-blend-multiply" />
+          <img src="/be10x-logo.png" alt="Be10x" className="h-8 object-contain mix-blend-multiply" />
         </div>
         <button 
           onClick={() => setMobileMenuOpen(true)}

@@ -7,7 +7,7 @@ import {
   Wrench, Database, PlayCircle, MessageSquare, Clock,
   AlertTriangle, ChevronDown, ChevronUp, BarChart2,
   PieChart as PieChartIcon, TrendingUp, Copy, ExternalLink,
-  Check, Zap
+  Check, Zap, X, Maximize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -250,6 +250,7 @@ const SessionDetail = () => {
   const session = sessions.find(s => s.id === Number(id));
   const detail = sessionDetails[Number(id)];
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
+  const [zoomedChart, setZoomedChart] = useState<'bar' | 'pie' | null>(null);
 
   if (!session) return <div className="p-8 text-ink-2">Session not found</div>;
 
@@ -318,22 +319,7 @@ const SessionDetail = () => {
         </div>
       </div>
 
-      {/* ── Tools Pill Row ── */}
-      {detail && (
-        <div className="flex flex-wrap gap-2 pb-6 border-b border-rule-2">
-          <span className="font-mono text-xs text-ink-3 uppercase tracking-widest self-center mr-1">Tools:</span>
-          {detail.tools.map((t, i) => (
-            <span
-              key={i}
-              className={`px-3 py-1 rounded-full text-xs font-mono border ${
-                t.primary ? 'bg-ink text-paper border-ink' : 'bg-paper border-rule-2 text-ink-2'
-              }`}
-            >
-              {t.name}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* Tools row removed as per request */}
 
       {/* ── Tab Bar ── */}
       {detail && (
@@ -592,7 +578,10 @@ RULES:
                     <div className="grid md:grid-cols-2 gap-8">
                       {/* Bar Chart */}
                       {detail.charts.bar && detail.charts.bar.length > 0 && (
-                        <div className="border border-rule-2 bg-paper-2 rounded-md p-6 shadow-sm">
+                        <div className="border border-rule-2 bg-paper-2 rounded-md p-6 shadow-sm relative group cursor-pointer" onClick={() => setZoomedChart('bar')}>
+                          <button className="absolute top-4 right-4 p-2 bg-paper rounded-full border border-rule shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-ink-2 hover:text-ink">
+                            <Maximize2 size={16} />
+                          </button>
                           <div className="flex items-center gap-2 mb-2">
                             <TrendingUp size={16} style={{ color: accentColor }} />
                             <h3 className="font-semibold text-sm">Key Metrics — {session.title}</h3>
@@ -606,7 +595,10 @@ RULES:
 
                       {/* Pie Chart */}
                       {(detail.charts.pie || detail.charts.donut) && (
-                        <div className="border border-rule-2 bg-paper-2 rounded-md p-6 shadow-sm">
+                        <div className="border border-rule-2 bg-paper-2 rounded-md p-6 shadow-sm relative group cursor-pointer" onClick={() => setZoomedChart('pie')}>
+                          <button className="absolute top-4 right-4 p-2 bg-paper rounded-full border border-rule shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-ink-2 hover:text-ink">
+                            <Maximize2 size={16} />
+                          </button>
                           <div className="flex items-center gap-2 mb-2">
                             <PieChartIcon size={16} style={{ color: accentColor }} />
                             <h3 className="font-semibold text-sm">Distribution Analysis</h3>
@@ -670,6 +662,57 @@ RULES:
           Detailed curriculum content for this session is coming soon.
         </div>
       )}
+      {/* Zoomed Chart Modal */}
+      <AnimatePresence>
+        {zoomedChart && detail && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 backdrop-blur-sm p-4 md:p-8"
+            onClick={() => setZoomedChart(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 10 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-paper p-8 rounded-xl shadow-2xl w-full max-w-4xl max-h-full overflow-y-auto relative"
+            >
+              <button
+                onClick={() => setZoomedChart(null)}
+                className="absolute top-4 right-4 p-2 bg-paper-2 hover:bg-paper-3 rounded-full transition-colors"
+              >
+                <X size={20} className="text-ink-2" />
+              </button>
+              
+              {zoomedChart === 'bar' && detail.charts.bar && (
+                <div>
+                  <div className="flex items-center gap-3 mb-6 border-b border-rule pb-4">
+                    <TrendingUp size={24} style={{ color: accentColor }} />
+                    <h2 className="text-2xl font-semibold">Key Metrics — {session.title}</h2>
+                  </div>
+                  <div className="scale-125 origin-top-left p-4 mt-8 pb-32">
+                    <BarChart data={detail.charts.bar} />
+                  </div>
+                </div>
+              )}
+              
+              {zoomedChart === 'pie' && (detail.charts.pie || detail.charts.donut) && (
+                <div>
+                  <div className="flex items-center gap-3 mb-6 border-b border-rule pb-4">
+                    <PieChartIcon size={24} style={{ color: accentColor }} />
+                    <h2 className="text-2xl font-semibold">Distribution Analysis</h2>
+                  </div>
+                  <div className="scale-150 origin-top flex justify-center mt-16 pb-24">
+                    <PieChart data={(detail.charts.pie || detail.charts.donut)!} />
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
