@@ -60,6 +60,23 @@ const SessionDetail = () => {
         </div>
       </section>
 
+      {session.theory && session.theory.length > 0 && (
+        <section className="mt-12 bg-paper-2 border border-rule-2 rounded-md p-8 shadow-sm">
+          <h3 className="text-2xl font-semibold mb-6 flex items-center">
+            <span className="text-ink mr-3">✦</span>
+            Theoretical Foundation
+          </h3>
+          <div className="grid md:grid-cols-2 gap-8">
+            {session.theory.map((item, idx) => (
+              <div key={idx} className="flex flex-col">
+                <h4 className="font-mono text-sm text-ink font-bold mb-3 uppercase tracking-wider">{item.title}</h4>
+                <p className="text-ink-2 leading-relaxed text-sm">{item.content}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="bg-[#1B1E22] text-[#E4DCC8] p-6 rounded-md font-mono text-sm shadow-md overflow-x-auto">
         <div className="text-ochre font-bold mb-4">// Core Prompt Pattern</div>
         <pre className="whitespace-pre-wrap">
