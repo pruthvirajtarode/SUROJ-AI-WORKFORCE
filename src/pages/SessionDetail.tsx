@@ -1,86 +1,373 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { sessions } from '../data/sessions';
-import { ArrowLeft, Users, FileText, CheckCircle2 } from 'lucide-react';
+import { sessionDetails } from '../data/sessionDetails';
+import {
+  ArrowLeft, Users, FileText, CheckCircle2, BookOpen,
+  Wrench, Database, PlayCircle, MessageSquare, Clock,
+  AlertTriangle, ChevronDown, ChevronUp, BarChart2,
+  PieChart as PieChartIcon, TrendingUp
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// ─── Tiny Chart Components (CSS-only, no library needed) ───────────────────────
+
+const BarChart = ({ data }: { data: { label: string; value: number; color?: string }[] }) => {
+  const max = Math.max(...data.map(d => Math.abs(d.value)), 1);
+  return (
+    <div className="space-y-3 mt-4">
+      {data.map((d, i) => {
+        const pct = (Math.abs(d.value) / max) * 100;
+        const isNeg = d.value < 0;
+        return (
+          <div key={i} className="flex items-center gap-3">
+            <div className="text-xs font-mono text-ink-2 w-44 shrink-0 text-right leading-tight">{d.label}</div>
+            <div className="flex-1 h-6 bg-paper-3 rounded overflow-hidden relative">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.8, delay: i * 0.1 }}
+                className="absolute top-0 bottom-0 left-0 rounded"
+                style={{ backgroundColor: isNeg ? '#5C6A3A' : (d.color || '#B0431E') }}
+              />
+              <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-mono font-bold text-paper z-10">
+                {typeof d.value === 'number' && d.value % 1 !== 0 ? d.value.toFixed(1) : d.value}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const PieChart = ({ data }: { data: { label: string; value: number; color?: string }[] }) => {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  let cumulative = 0;
+  const radius = 70;
+  const cx = 90;
+  const cy = 90;
+
+  const slices = data.map(d => {
+    const startAngle = (cumulative / total) * 360;
+    cumulative += d.value;
+    const endAngle = (cumulative / total) * 360;
+    return { ...d, startAngle, endAngle, pct: ((d.value / total) * 100).toFixed(1) };
+  });
+
+  const polarToCartesian = (angle: number) => {
+    const rad = ((angle - 90) * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  };
+
+  const describeArc = (start: number, end: number) => {
+    if (end - start >= 360) end = 359.99;
+    const s = polarToCartesian(start);
+    const e = polarToCartesian(end);
+    const largeArc = end - start > 180 ? 1 : 0;
+    return `M ${cx} ${cy} L ${s.x} ${s.y} A ${radius} ${radius} 0 ${largeArc} 1 ${e.x} ${e.y} Z`;
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row items-center gap-6 mt-4">
+      <svg width="180" height="180" className="shrink-0">
+        {slices.map((s, i) => (
+          <motion.path
+            key={i}
+            d={describeArc(s.startAngle, s.endAngle)}
+            fill={s.color || '#B0431E'}
+            stroke="var(--color-paper, #F6F2E9)"
+            strokeWidth="2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+          />
+        ))}
+      </svg>
+      <div className="space-y-2 flex-1">
+        {slices.map((s, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm">
+            <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: s.color }} />
+            <span className="text-ink-2 flex-1 text-xs leading-tight">{s.label}</span>
+            <span className="font-mono text-xs font-bold text-ink">{s.pct}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Collapsible Dataset Block ─────────────────────────────────────────────────
+
+const DatasetBlock = ({ title, content }: { title: string; content: string }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border border-rule-2 rounded mt-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-3 font-mono text-xs text-ink bg-paper-3 hover:bg-paper-2 transition-colors rounded text-left"
+      >
+        <span>▸ {title}</span>
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <pre className="p-4 font-mono text-[11px] leading-relaxed whitespace-pre-wrap overflow-x-auto text-ink-2 bg-[#FDFBF5] border-t border-rule max-h-80 overflow-y-auto">
+              {content}
+            </pre>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ─── Tab Definitions ──────────────────────────────────────────────────────────
+
+type TabId = 'agenda' | 'theory' | 'prompts' | 'dataset' | 'exercise' | 'charts';
+
+const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
+  { id: 'agenda', label: 'Agenda', icon: Clock },
+  { id: 'theory', label: 'Theory', icon: BookOpen },
+  { id: 'prompts', label: 'Prompts', icon: FileText },
+  { id: 'dataset', label: 'Dataset', icon: Database },
+  { id: 'exercise', label: 'Exercises', icon: PlayCircle },
+  { id: 'charts', label: 'Charts', icon: BarChart2 },
+];
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const SessionDetail = () => {
   const { id } = useParams();
   const session = sessions.find(s => s.id === Number(id));
+  const detail = sessionDetails[Number(id)];
+  const [activeTab, setActiveTab] = useState<TabId>('agenda');
 
-  if (!session) return <div className="p-8">Session not found</div>;
+  if (!session) return <div className="p-8 text-ink-2">Session not found</div>;
+
+  const accentColor = {
+    rust: '#B0431E', brick: '#7A2E1F', indigo: '#2E3F63',
+    steel: '#35566B', slate: '#445362', ochre: '#B58022',
+    iron: '#4A4A4A', moss: '#5C6A3A'
+  }[session.color] || '#B0431E';
 
   return (
-    <div className="space-y-10 animate-fade-in pb-10">
-      <Link to="/sessions" className="inline-flex items-center text-sm font-mono text-ink-3 hover:text-ink transition-colors">
-        <ArrowLeft size={14} className="mr-2" />
-        Back to Sessions
+    <div className="space-y-0 animate-fade-in pb-16">
+      {/* ── Back ── */}
+      <Link to="/sessions" className="inline-flex items-center text-sm font-mono text-ink-3 hover:text-ink transition-colors mb-6">
+        <ArrowLeft size={14} className="mr-2" />Back to Sessions
       </Link>
 
-      <header className="border-b border-rule-2 pb-8">
+      {/* ── Header ── */}
+      <div className="border-b-4 pb-6 mb-0" style={{ borderColor: accentColor }}>
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div>
-            <div className="font-mono text-xs text-ink-3 tracking-widest mb-3 uppercase">Session 0{session.id} · {session.family}</div>
+            <div className="font-mono text-xs text-ink-3 tracking-widest mb-3 uppercase">
+              Session 0{session.id} · {session.family}
+            </div>
             <h1 className="text-4xl font-semibold mb-4">{session.title}</h1>
             <p className="text-xl text-ink-2 font-serif italic max-w-3xl leading-relaxed">
               {session.objective}
             </p>
           </div>
-          <div className="bg-paper-2 border border-rule-2 rounded-md p-4 min-w-[200px] shrink-0">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-paper-2 border border-rule-2 rounded-md p-4 min-w-[220px] shrink-0">
+            <div className="flex justify-between items-center mb-3">
               <span className="font-mono text-xs text-ink-3 uppercase">Headcount</span>
-              <span className="flex items-center font-bold text-lg"><Users size={18} className="mr-2 text-ink-3" />{session.headcount}</span>
+              <span className="flex items-center font-bold text-lg">
+                <Users size={18} className="mr-2 text-ink-3" />{session.headcount}
+              </span>
             </div>
             {session.departments.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-1 border-t border-rule pt-3">
                 {session.departments.map(dept => (
-                  <div key={dept.name} className="flex justify-between text-sm">
-                    <span className="text-ink-2 truncate mr-2" title={dept.name}>{dept.name}</span>
-                    <span className="font-mono">{dept.count}</span>
+                  <div key={dept.name} className="flex justify-between text-xs">
+                    <span className="text-ink-2 truncate mr-2">{dept.name}</span>
+                    <span className="font-mono font-bold">{dept.count}</span>
                   </div>
                 ))}
               </div>
             )}
+            <div className="mt-3 border-t border-rule pt-3 text-xs font-mono text-ink-3">
+              FAMILY: {session.family}
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <section className="grid md:grid-cols-2 gap-8">
-        <div className="bg-paper border-l-4 border-rust p-6">
-          <h3 className="font-semibold text-lg mb-4 flex items-center"><FileText size={20} className="mr-2 text-rust" />The Real Problem</h3>
-          <p className="text-ink-2 leading-relaxed">
-            {session.problem || "Reading hundreds of pages to find critical clauses hidden in annexures takes days and is prone to human fatigue."}
-          </p>
-        </div>
-        
-        <div className="bg-paper border-l-4 border-ok p-6">
-          <h3 className="font-semibold text-lg mb-4 flex items-center"><CheckCircle2 size={20} className="mr-2 text-ok" />The AI Opportunity</h3>
-          <p className="text-ink-2 leading-relaxed">
-            {session.aiOpportunity || "An LLM can read the entire document in seconds and extract relevant data, providing a structured first draft for human verification."}
-          </p>
-        </div>
-      </section>
-
-      {session.theory && session.theory.length > 0 && (
-        <section className="mt-12 bg-paper-2 border border-rule-2 rounded-md p-8 shadow-sm">
-          <h3 className="text-2xl font-semibold mb-6 flex items-center">
-            <span className="text-ink mr-3">✦</span>
-            Theoretical Foundation
+      {/* ── Problem / Opportunity Cards ── */}
+      <div className="grid md:grid-cols-2 gap-4 py-6">
+        <div className="bg-paper border-l-4 p-5 rounded-r-md shadow-sm" style={{ borderLeftColor: accentColor }}>
+          <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
+            <AlertTriangle size={16} style={{ color: accentColor }} />The Real Problem
           </h3>
-          <div className="grid md:grid-cols-2 gap-8">
-            {session.theory.map((item, idx) => (
-              <div key={idx} className="flex flex-col">
-                <h4 className="font-mono text-sm text-ink font-bold mb-3 uppercase tracking-wider">{item.title}</h4>
-                <p className="text-ink-2 leading-relaxed text-sm">{item.content}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+          <p className="text-ink-2 leading-relaxed text-sm">{session.problem}</p>
+        </div>
+        <div className="bg-paper border-l-4 border-ok p-5 rounded-r-md shadow-sm">
+          <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-ok" />The AI Opportunity
+          </h3>
+          <p className="text-ink-2 leading-relaxed text-sm">{session.aiOpportunity}</p>
+        </div>
+      </div>
+
+      {/* ── Tools Pill Row ── */}
+      {detail && (
+        <div className="flex flex-wrap gap-2 pb-6 border-b border-rule-2">
+          <span className="font-mono text-xs text-ink-3 uppercase tracking-widest self-center mr-1">Tools:</span>
+          {detail.tools.map((t, i) => (
+            <span
+              key={i}
+              className={`px-3 py-1 rounded-full text-xs font-mono border ${
+                t.primary ? 'bg-ink text-paper border-ink' : 'bg-paper border-rule-2 text-ink-2'
+              }`}
+            >
+              {t.name}
+            </span>
+          ))}
+        </div>
       )}
 
-      <div className="bg-[#1B1E22] text-[#E4DCC8] p-6 rounded-md font-mono text-sm shadow-md overflow-x-auto">
-        <div className="text-ochre font-bold mb-4">// Core Prompt Pattern</div>
-        <pre className="whitespace-pre-wrap">
-You are a [ROLE] at Suroj Buildcon.
+      {/* ── Tab Bar ── */}
+      {detail && (
+        <>
+          <div className="flex gap-0 border-b border-rule-2 overflow-x-auto mt-0 -mx-0 hide-scrollbar">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-current text-ink font-semibold'
+                    : 'border-transparent text-ink-3 hover:text-ink-2'
+                }`}
+                style={activeTab === tab.id ? { borderBottomColor: accentColor, color: accentColor } : {}}
+              >
+                <tab.icon size={15} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── Tab Panels ── */}
+          <div className="pt-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+
+                {/* ─── AGENDA ─── */}
+                {activeTab === 'agenda' && (
+                  <div className="space-y-6 max-w-3xl">
+                    <h2 className="text-xl font-semibold">Session Agenda</h2>
+                    <div className="space-y-2">
+                      {detail.agenda.map((item, i) => {
+                        const parts = item.split(' · ');
+                        const time = parts[0];
+                        const desc = parts.slice(1).join(' · ');
+                        return (
+                          <div key={i} className="grid grid-cols-[130px_1fr] gap-4 py-3 border-b border-rule last:border-0">
+                            <span className="font-mono text-xs text-ink-3">{time}</span>
+                            <span className="text-sm text-ink-2">{desc}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Case Study Card */}
+                    <div className="mt-8 bg-paper-2 border border-rule-2 rounded-md p-6 shadow-sm">
+                      <div className="font-mono text-xs text-ink-3 uppercase tracking-widest mb-3">Case Study</div>
+                      <h3 className="text-lg font-semibold mb-3">{detail.caseStudy.title}</h3>
+                      <p className="text-sm text-ink-2 leading-relaxed mb-4">{detail.caseStudy.story}</p>
+                      <div className="bg-paper border-l-4 border-ok p-4 rounded-r mb-3">
+                        <div className="text-xs font-mono font-bold text-ok mb-1">WHAT CHANGED WITH AI</div>
+                        <p className="text-sm text-ink-2">{detail.caseStudy.outcome}</p>
+                      </div>
+                      <div className="bg-paper border border-rule-2 p-4 rounded">
+                        <div className="text-xs font-mono font-bold text-ink-3 mb-1">TAKEAWAY FOR THE ROOM</div>
+                        <p className="text-sm text-ink-2 italic">{detail.caseStudy.takeaway}</p>
+                      </div>
+                    </div>
+
+                    {/* Closing Q&A */}
+                    <div className="mt-6 border border-rule-2 rounded-md p-5">
+                      <div className="font-mono text-xs text-ink-3 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <MessageSquare size={12} />Closing Q&A Prompts
+                      </div>
+                      <ol className="space-y-2">
+                        {detail.closingQA.map((q, i) => (
+                          <li key={i} className="text-sm text-ink-2 flex gap-3">
+                            <span className="font-mono text-ink-3 shrink-0">{i + 1}.</span>
+                            <span className="font-serif italic">{q}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+                )}
+
+                {/* ─── THEORY ─── */}
+                {activeTab === 'theory' && (
+                  <div className="space-y-6 max-w-3xl">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <span style={{ color: accentColor }}>✦</span> Theoretical Foundation
+                    </h2>
+                    <p className="text-ink-2 font-serif italic text-base leading-relaxed">
+                      {session.objective}
+                    </p>
+
+                    {/* Theory Blocks */}
+                    <div className="space-y-4 mt-4">
+                      {detail.theory.map((item, i) => (
+                        <div key={i} className="border border-rule-2 bg-paper-2 rounded-md p-5">
+                          <h4 className="font-mono text-xs font-bold text-ink uppercase tracking-widest mb-3">
+                            {item.title}
+                          </h4>
+                          <p className="text-sm text-ink-2 leading-relaxed">{item.content}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pitfalls */}
+                    <div className="bg-[#F5E4D8] border border-danger/20 rounded-md p-5 mt-6">
+                      <div className="font-mono text-xs font-bold text-danger uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <AlertTriangle size={12} />Common Pitfalls In This Room
+                      </div>
+                      <ul className="space-y-2">
+                        {detail.pitfalls.map((p, i) => (
+                          <li key={i} className="text-sm text-ink-2 flex gap-3">
+                            <span className="text-danger font-bold shrink-0">•</span>
+                            <span>{p}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {/* ─── PROMPTS ─── */}
+                {activeTab === 'prompts' && (
+                  <div className="space-y-6 max-w-3xl">
+                    <h2 className="text-xl font-semibold">Prompt Patterns for This Room</h2>
+                    <p className="text-sm text-ink-2">
+                      These prompts are designed for {session.title}. Each follows the five-part anatomy:
+                      <span className="font-mono bg-paper-3 px-1 mx-1 text-xs">Role → Context → Task → Format → Rules</span>
+                    </p>
+
+                    {/* Generic reusable prompt */}
+                    <div className="bg-[#1B1E22] text-[#E4DCC8] p-5 rounded-md font-mono text-xs leading-relaxed shadow-md">
+                      <div className="text-ochre font-bold mb-3">// Core Prompt Pattern (reusable across all sessions)</div>
+                      <pre className="whitespace-pre-wrap">{`You are a [ROLE] at Suroj Buildcon.
 The document below is [CONTEXT].
 
 TASK:
@@ -92,20 +379,196 @@ Table with columns: [COL 1], [COL 2], [COL 3]
 RULES:
 - Cite the exact clause for every point.
 - Do not add information not present in the document.
-        </pre>
-      </div>
-      
-      <div className="border border-rule-2 bg-[#FDFBF5] p-6 rounded-md mt-8">
-        <div className="flex justify-between items-center mb-4 border-b border-rule pb-2">
-          <h3 className="font-semibold text-lg">Interactive Exercise</h3>
-          <span className="text-xs font-mono px-2 py-1 bg-paper border border-rule rounded">30 MIN</span>
-        </div>
-        <p className="mb-6 text-ink-2">Use the Synthetic Data Lab to generate a test document and run the core prompt.</p>
-        <Link to="/data-lab" className="inline-flex px-4 py-2 bg-ink text-paper text-sm font-semibold rounded hover:bg-ink-2 transition-colors">
-          Open Synthetic Data Lab →
-        </Link>
-      </div>
+- If unclear, mark it "unclear" — do not guess.`}</pre>
+                    </div>
 
+                    {/* Session-specific patterns */}
+                    {detail.prompts.map((p, i) => (
+                      <div key={i} className="border border-rule-2 rounded-md overflow-hidden">
+                        <div className="bg-paper-3 px-4 py-2 font-mono text-xs font-bold text-ink uppercase tracking-wider border-b border-rule">
+                          {p.title}
+                        </div>
+                        <div className="bg-[#1B1E22] text-[#E4DCC8] p-4 font-mono text-xs leading-relaxed overflow-x-auto">
+                          <pre className="whitespace-pre-wrap">{p.prompt}</pre>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ─── DATASET ─── */}
+                {activeTab === 'dataset' && (
+                  <div className="space-y-6 max-w-3xl">
+                    <h2 className="text-xl font-semibold">Synthetic Datasets</h2>
+                    <p className="text-sm text-ink-2 leading-relaxed">
+                      Every company name, employee name, GSTIN, PAN, and financial figure below is synthetic.
+                      Any resemblance to real Suroj vendors, employees, or projects is coincidental.
+                      These are teaching materials only.
+                    </p>
+                    <div className="bg-[#E6EBDA] border border-ok/20 rounded p-3 text-sm text-ok font-medium flex items-center gap-2">
+                      <CheckCircle2 size={14} />
+                      Safe to use in public AI tools — all real identifiers have been replaced.
+                    </div>
+
+                    {detail.exercises.map((ex, i) =>
+                      ex.dataset ? (
+                        <div key={i}>
+                          <DatasetBlock
+                            title={`DATASET · ${ex.title}`}
+                            content={ex.dataset}
+                          />
+                        </div>
+                      ) : null
+                    )}
+
+                    {/* If no datasets exist, show a message */}
+                    {!detail.exercises.some(e => e.dataset) && (
+                      <div className="bg-paper-2 border border-rule-2 rounded-md p-6 text-center">
+                        <Database size={32} className="mx-auto mb-3 text-ink-3" />
+                        <p className="text-ink-2 text-sm">
+                          This session's exercises use documents provided by participants. Ask attendees to bring one real document from their current week's work — a tender, a quotation, a notice, a meeting transcript.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ─── EXERCISES ─── */}
+                {activeTab === 'exercise' && (
+                  <div className="space-y-6 max-w-4xl">
+                    <h2 className="text-xl font-semibold">Hands-On Exercises</h2>
+
+                    {detail.exercises.map((ex, i) => (
+                      <div key={i} className="border border-rule-2 bg-[#FDFBF5] rounded-md overflow-hidden shadow-sm">
+                        <div className="bg-paper-3 px-5 py-3 flex items-center justify-between border-b border-rule">
+                          <span className="font-mono text-xs font-bold text-ink uppercase tracking-wider">{ex.title}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-xs text-ink-3">{ex.level}</span>
+                            <span className="border border-rule-2 rounded px-2 py-0.5 text-xs font-mono text-ink-2 flex items-center gap-1">
+                              <Clock size={10} />{ex.duration}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="p-5 space-y-4">
+                          <div>
+                            <div className="text-xs font-mono font-bold text-ink-3 mb-2 uppercase">Setup</div>
+                            <p className="text-sm text-ink-2 leading-relaxed">{ex.setup}</p>
+                          </div>
+                          {ex.dataset && (
+                            <DatasetBlock title="SYNTHETIC DATA FOR THIS EXERCISE" content={ex.dataset} />
+                          )}
+                          <div className="bg-paper-2 border border-rule rounded p-4">
+                            <div className="font-mono text-xs font-bold text-ink-3 uppercase mb-2 flex items-center gap-1">
+                              <Wrench size={10} />Facilitator Debrief
+                            </div>
+                            <p className="text-sm text-ink-2 italic">{ex.debrief}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Link to Data Lab */}
+                    <div className="border border-rule-2 bg-paper-2 p-5 rounded-md flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-sm mb-1">Generate More Synthetic Data</div>
+                        <p className="text-xs text-ink-2">Use the Synthetic Data Lab to generate additional test documents.</p>
+                      </div>
+                      <Link
+                        to="/data-lab"
+                        className="inline-flex px-4 py-2 bg-ink text-paper text-xs font-semibold rounded hover:bg-ink-2 transition-colors whitespace-nowrap"
+                      >
+                        Open Synthetic Data Lab →
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* ─── CHARTS ─── */}
+                {activeTab === 'charts' && (
+                  <div className="space-y-8 max-w-4xl">
+                    <h2 className="text-xl font-semibold">Data & Impact Visualisations</h2>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {/* Bar Chart */}
+                      {detail.charts.bar && detail.charts.bar.length > 0 && (
+                        <div className="border border-rule-2 bg-paper-2 rounded-md p-6 shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <TrendingUp size={16} style={{ color: accentColor }} />
+                            <h3 className="font-semibold text-sm">Key Metrics — {session.title}</h3>
+                          </div>
+                          <p className="text-xs text-ink-3 mb-1">
+                            Comparative data illustrating the impact of AI-assisted workflows.
+                          </p>
+                          <BarChart data={detail.charts.bar} />
+                        </div>
+                      )}
+
+                      {/* Pie Chart */}
+                      {(detail.charts.pie || detail.charts.donut) && (
+                        <div className="border border-rule-2 bg-paper-2 rounded-md p-6 shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <PieChartIcon size={16} style={{ color: accentColor }} />
+                            <h3 className="font-semibold text-sm">Distribution Analysis</h3>
+                          </div>
+                          <p className="text-xs text-ink-3 mb-1">
+                            Breakdown of categories and patterns in this session's domain.
+                          </p>
+                          <PieChart data={(detail.charts.pie || detail.charts.donut)!} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Stats Cards Row */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {detail.charts.bar?.slice(0, 4).map((d, i) => (
+                        <div key={i} className="border border-rule-2 bg-paper-2 rounded-md p-4 text-center">
+                          <div className="text-2xl font-bold mb-1" style={{ color: d.color || accentColor }}>
+                            {typeof d.value === 'number' && d.value > 100
+                              ? `₹${d.value}`
+                              : `${d.value}${typeof d.value === 'number' && d.value < 100 && String(d.value).includes('.') ? '' : ''}`}
+                          </div>
+                          <div className="text-xs font-mono text-ink-3 leading-tight">{d.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Session-wide stats from sessions data */}
+                    <div className="border border-rule-2 bg-paper-2 rounded-md p-6">
+                      <h3 className="font-semibold text-sm mb-4">Session Summary</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                          <div className="text-3xl font-bold" style={{ color: accentColor }}>{session.headcount}</div>
+                          <div className="text-xs font-mono text-ink-3 mt-1">PARTICIPANTS</div>
+                        </div>
+                        <div>
+                          <div className="text-3xl font-bold" style={{ color: accentColor }}>{detail.exercises.length}</div>
+                          <div className="text-xs font-mono text-ink-3 mt-1">EXERCISES</div>
+                        </div>
+                        <div>
+                          <div className="text-3xl font-bold" style={{ color: accentColor }}>{detail.prompts.length}</div>
+                          <div className="text-xs font-mono text-ink-3 mt-1">PROMPT PATTERNS</div>
+                        </div>
+                        <div>
+                          <div className="text-3xl font-bold" style={{ color: accentColor }}>{detail.theory.length}</div>
+                          <div className="text-xs font-mono text-ink-3 mt-1">THEORY BLOCKS</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </>
+      )}
+
+      {/* Fallback for sessions without detail data */}
+      {!detail && (
+        <div className="mt-6 bg-paper-2 border border-rule-2 rounded p-6 text-center text-ink-2">
+          Detailed curriculum content for this session is coming soon.
+        </div>
+      )}
     </div>
   );
 };
