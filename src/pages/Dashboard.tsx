@@ -92,8 +92,12 @@ const Dashboard = () => {
             className="font-mono text-sm text-ochre mb-6 uppercase tracking-widest flex items-center gap-4"
           >
             <div className="w-2 h-2 bg-rust rounded-full animate-pulse"></div>
-            <div className="bg-white rounded-xl p-2 md:p-3 flex items-center gap-3 shadow-lg transform transition-transform hover:scale-105">
+            {/* Suroj logo — own card */}
+            <div className="bg-white rounded-xl p-2 md:p-3 flex items-center shadow-lg transform transition-transform hover:scale-105">
               <img src="/suroj-logo.svg" alt="Suroj Buildcon" className="h-12 md:h-16 w-auto object-contain" />
+            </div>
+            {/* Be10x logo — own separate card */}
+            <div className="bg-white rounded-xl p-2 md:p-3 flex items-center shadow-lg transform transition-transform hover:scale-105">
               <img src="/be10x-logo.png" alt="Be10x Logo" className="h-12 md:h-16 w-auto object-contain" />
             </div>
           </motion.div>

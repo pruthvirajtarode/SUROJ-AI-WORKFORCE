@@ -64,18 +64,17 @@ export default function AppLayout() {
       <div className={`p-4 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center py-5' : 'justify-center'}`}>
         {!collapsed ? (
           <>
-            {/* Suroj logo image replaces text */}
-            <div className="flex items-center gap-3 mb-2">
-              <img
-                src="/suroj-logo.svg"
-                alt="Suroj Buildcon"
-                className="h-16 w-16 rounded-xl object-contain shadow-sm"
-              />
-              <div className="flex flex-col gap-2">
-                <img src="/be10x-logo.png" alt="Be10x" className="h-8 object-contain mix-blend-multiply" />
-              </div>
-            </div>
-            <p className="font-sans font-medium text-ink-3 text-[10px] leading-tight uppercase tracking-wider mt-1">AI Workforce Transformation</p>
+            {/* Suroj logo — top */}
+            <img
+              src="/suroj-logo.svg"
+              alt="Suroj Buildcon"
+              className="h-12 w-12 rounded-xl object-contain shadow-sm mb-2"
+            />
+            {/* thin rule */}
+            <div className="h-px bg-rule w-full my-2" />
+            {/* Be10x logo — separate below */}
+            <img src="/be10x-logo.png" alt="Be10x" className="h-7 object-contain mix-blend-multiply mb-1" />
+            <p className="font-sans font-medium text-ink-3 text-[10px] leading-tight uppercase tracking-wider">AI Workforce Transformation</p>
           </>
         ) : (
           <img src="/suroj-logo.svg" alt="Suroj" className="h-10 w-10 rounded-lg object-contain" title="Suroj Buildcon × Be10x" />
