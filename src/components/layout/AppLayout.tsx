@@ -43,7 +43,11 @@ export default function AppLayout() {
 
   // Close mobile menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
+    // Avoid setting state unnecessarily on initial mount or if already false
+    setMobileMenuOpen((prev) => {
+      if (prev) return false;
+      return prev;
+    });
   }, [location.pathname]);
 
   // Prevent body scroll when mobile menu is open
@@ -55,7 +59,7 @@ export default function AppLayout() {
     }
   }, [mobileMenuOpen]);
 
-  const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
+  const SidebarContent = ({ collapsed = false, location, setMobileMenuOpen }: { collapsed?: boolean, location?: any, setMobileMenuOpen?: (v: boolean) => void }) => (
     <>
       <div className={`p-5 border-b border-rule shrink-0 flex flex-col ${collapsed ? 'items-center justify-center' : 'justify-center'} min-h-[84px]`}>
         {!collapsed ? (
@@ -146,7 +150,7 @@ export default function AppLayout() {
                   <X size={20} className="text-ink" />
                 </button>
               </div>
-              <SidebarContent collapsed={false} />
+              <SidebarContent collapsed={false} location={location} setMobileMenuOpen={setMobileMenuOpen} />
             </motion.aside>
           </motion.div>
         )}
@@ -158,7 +162,7 @@ export default function AppLayout() {
         transition={{ type: "spring", bounce: 0, duration: 0.3 }}
         className="hidden md:flex flex-col border-r border-rule-2 bg-paper-2 h-screen sticky top-0 z-30"
       >
-        <SidebarContent collapsed={desktopCollapsed} />
+        <SidebarContent collapsed={desktopCollapsed} location={location} />
         
         {/* Desktop Collapse Toggle */}
         <div className="p-4 border-t border-rule flex justify-center">

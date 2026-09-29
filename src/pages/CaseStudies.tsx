@@ -3,41 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, AlertTriangle, Lightbulb, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const caseStudies = [
-  {
-    id: 1,
-    title: "The addendum that mattered",
-    session: "Tendering & Contracts",
-    context: "A 300-page tender received a 40-page addendum four days before submission.",
-    problem: "The addendum buried a change to the mobilization advance recovery terms inside a seemingly unrelated clause about progress billing. Human reviewers missed it during the fast-tracked review.",
-    solution: "The tender team ran a delta-comparison prompt using an LLM. The AI flagged the exact clause where 'recovery at 20% progress' was changed to 'recovery at 10% progress'.",
-    result: "The firm adjusted their working capital projection, saving an unexpected cash flow gap of ₹2.4Cr.",
-    badge: "CASE STUDY",
-    color: "rust"
-  },
-  {
-    id: 2,
-    title: "The chiller room that was 100 mm short",
-    session: "EPC Bids & Design-Build",
-    context: "Design-build MEP package coordination.",
-    problem: "The architectural drawing specified a finished floor level that, when combined with the structural slab depth and the newly specified chiller dimensions, left exactly 100 mm too little clearance for the required HVAC ducting overhead.",
-    solution: "By feeding the dimensional constraints from the spec and the structural constraints into an AI analyzer prompt, the system flagged the spatial conflict before the priced BOQ was locked.",
-    result: "Pre-bid query raised, design modified by client, avoiding a costly site-level variation request.",
-    badge: "TRAINING SCENARIO",
-    color: "indigo"
-  },
-  {
-    id: 3,
-    title: "The lowest quote that wasn't",
-    session: "Procurement & Stores",
-    context: "Comparing three vendor quotes for a major steel procurement package.",
-    problem: "Vendor A had the lowest basic rate. Vendor B had higher basic rate but included unloading and had shorter lead times. Vendor C had a complex staggered payment term.",
-    solution: "The procurement team used a 'Total Cost of Ownership' normalization prompt. The AI produced a leveled comparison table incorporating the time-value of money for the advance payment and the cost of site unloading.",
-    result: "Vendor B was revealed to be 4% cheaper in total actual cost than Vendor A.",
-    badge: "CASE STUDY",
-    color: "ochre"
-  }
-];
+import { caseStudies } from '../data/caseStudies';
 
 const CaseStudies = () => {
   const containerVars: any = {
@@ -79,7 +45,7 @@ const CaseStudies = () => {
       </div>
 
       <motion.div variants={containerVars} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {caseStudies.map((cs, i) => {
+        {caseStudies.map((cs) => {
           const colorClasses = getColorClasses(cs.color);
           const colorBase = colorClasses.split(' ')[0].replace('bg-', '');
           
@@ -115,14 +81,18 @@ const CaseStudies = () => {
                   
                   <div className="relative pl-6">
                     <Lightbulb size={16} className={`absolute left-0 top-0.5 text-${colorBase}`} />
-                    <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">AI Approach</div>
+                    <div className="text-xs font-mono font-bold text-ink-3 uppercase mb-1">{cs.aiWorkflow ? "AI Approach" : "Solution"}</div>
                     <p className="text-sm leading-relaxed">{cs.solution}</p>
                   </div>
                   
-                  <div className="relative pl-6 bg-[#E6EBDA] p-3 rounded-lg border border-ok/20 -ml-2">
+                  <div className="relative pl-6 bg-[#E6EBDA] p-3 rounded-lg border border-ok/20 -ml-2 mb-2">
                     <TrendingUp size={16} className="absolute left-2 top-3.5 text-ok" />
-                    <div className="text-xs font-mono font-bold text-ok uppercase mb-1">Business Impact</div>
+                    <div className="text-xs font-mono font-bold text-ok uppercase mb-1">Impact / Outcome</div>
                     <p className="text-sm font-semibold text-ink">{cs.result}</p>
+                  </div>
+
+                  <div className="text-[10px] text-ink-3 italic border-t border-rule mt-4 pt-2">
+                    Source: {cs.source}
                   </div>
                 </div>
               </div>

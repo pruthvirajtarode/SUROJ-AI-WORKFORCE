@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Download, Play, CheckCircle2, Database, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, Play, Database, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Deterministic generators

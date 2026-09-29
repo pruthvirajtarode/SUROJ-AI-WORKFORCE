@@ -48,14 +48,14 @@ const SessionDetail = () => {
         <div className="bg-paper border-l-4 border-rust p-6">
           <h3 className="font-semibold text-lg mb-4 flex items-center"><FileText size={20} className="mr-2 text-rust" />The Real Problem</h3>
           <p className="text-ink-2 leading-relaxed">
-            Placeholder for specific department problems, e.g. "Reading 300 pages of tender documents to find three critical clauses hidden in annexures takes days and is prone to human fatigue."
+            {session.problem || "Reading hundreds of pages to find critical clauses hidden in annexures takes days and is prone to human fatigue."}
           </p>
         </div>
         
         <div className="bg-paper border-l-4 border-ok p-6">
           <h3 className="font-semibold text-lg mb-4 flex items-center"><CheckCircle2 size={20} className="mr-2 text-ok" />The AI Opportunity</h3>
           <p className="text-ink-2 leading-relaxed">
-            Placeholder for AI solution: "An LLM can read the entire document in seconds and extract every obligation, mapped to clause numbers, providing a structured first draft for human verification."
+            {session.aiOpportunity || "An LLM can read the entire document in seconds and extract relevant data, providing a structured first draft for human verification."}
           </p>
         </div>
       </section>
@@ -63,7 +63,7 @@ const SessionDetail = () => {
       <div className="bg-[#1B1E22] text-[#E4DCC8] p-6 rounded-md font-mono text-sm shadow-md overflow-x-auto">
         <div className="text-ochre font-bold mb-4">// Core Prompt Pattern</div>
         <pre className="whitespace-pre-wrap">
-You are a [ROLE] at an Indian EPC firm.
+You are a [ROLE] at Suroj Buildcon.
 The document below is [CONTEXT].
 
 TASK:
